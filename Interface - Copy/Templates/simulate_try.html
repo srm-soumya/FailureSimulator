@@ -1,0 +1,1559 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Failure Simulator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+.button {
+  border: none;
+  color: black;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 32px;
+  margin: -400px 120px;
+  cursor: pointer;
+}
+
+.button1 {background-color: #4CAF50;} /* Green */
+
+</style>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container">
+        <a class="navbar-brand" href="#">Reliability Simulations</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="/">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/about">About</a>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Models
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <li><a class="dropdown-item" href="/weibull">Weibull</a></li>
+                  <li><a class="dropdown-item" href="#">Shock Based Models</a></li>
+                  <li><a class="dropdown-item" href="#">Degradation Models</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="#">Something else here</a></li>
+              </ul>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/contact">Contact Us: </a>
+            </li>
+          </ul>
+          <form class="d-flex" role="search">
+            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+            <button class="btn btn-outline-success" type="submit">Search</button>
+          </form>
+        </div>
+      </div>
+    </nav>
+
+    <form method="post">
+      {% csrf_token %}
+      <select onchange="get_form()" name="function_name" id="select-list">
+          <option disabled selected value> -- select an option -- </option>
+          {% for function_name in function_list %}]
+          <option  class="select-options"  value="{{function_name }}">{{ function_name }}</option>
+          {% endfor %}
+      </select>
+<!--      <button type="submit" id="">Execute function</button>-->
+    </form>
+
+    <div id="value_form">
+      <form id="fn_name_form">
+  <!--      <button type="submit" onclick="Submit"></button>-->
+      </form>
+    </div>
+
+    <style>
+      form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 20px;
+      }
+
+      select {
+        font-size: 18px;
+        padding: 8px 16px;
+        border: 2px solid #ccc;
+        border-radius: 4px;
+        margin-bottom: 16px;
+      }
+
+      button[type="save"] {
+        background-color: #4CAF50;
+        color: white;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 18px;
+      }
+
+      button[type="save"]:hover {
+        background-color: #3e8e41;
+      }
+
+    </style>
+
+
+    <button type="Save" onclick="location.reload()">Save</button>
+
+    <form action="/show_data" method="get">
+      <button type="submit" id="">Show the system</button>
+    </form>
+
+    <style>
+      form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 20px;
+      }
+
+      select {
+        font-size: 18px;
+        padding: 8px 16px;
+        border: 2px solid #ccc;
+        border-radius: 4px;
+        margin-bottom: 16px;
+      }
+
+      button[type="submit"] {
+        background-color: #4CAF50;
+        color: white;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 18px;
+      }
+
+      button[type="submit"]:hover {
+        background-color: #3e8e41;
+      }
+
+    </style>
+
+
+
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+<script src="main.js"></script>
+
+<script type="text/javascript">
+
+
+function show_params(fn_name) {
+  console.log(fn_name)
+  document.getElementById("value_form").innerHTML = ""
+
+
+
+    <!--FOR WEIBULL FUNCTION-->
+  if (fn_name === "Weibull") {
+    const lineBreak = document.createElement("br");
+    const inp1_Weibull = document.createElement("input");
+    inp1_Weibull.setAttribute("id","input1_Weibull")
+    inp1_Weibull.setAttribute("name","name1_Weibull")
+    inp1_Weibull.placeholder="Component";
+    inp1_Weibull.style.display = "block";
+    inp1_Weibull.style.margin = "auto";
+    const lineBreakClone1 = lineBreak.cloneNode();
+
+    const inp2_Weibull = document.createElement("input");
+    inp2_Weibull.setAttribute("id","input2_Weibull")
+    inp2_Weibull.setAttribute("name","name2_Weibull")
+    inp2_Weibull.placeholder="Eta";
+    inp2_Weibull.style.display = "block";
+    inp2_Weibull.style.margin = "auto";
+    const lineBreakClone2 = lineBreak.cloneNode();
+    <!--  const node = document.createTextNode("This is new.");-->
+    <!--  para.appendChild(node);-->
+
+    const inp3_Weibull = document.createElement("input");
+    inp3_Weibull.setAttribute("id","input3_Weibull")
+    inp3_Weibull.setAttribute("name","name3_Weibull")
+    inp3_Weibull.placeholder="Beta";
+    inp3_Weibull.style.display = "block";
+    inp3_Weibull.style.margin = "auto";
+    const lineBreakClone3 = lineBreak.cloneNode();
+
+    const inp4_Weibull = document.createElement("input");
+    inp4_Weibull.setAttribute("id","input4_Weibull")
+    inp4_Weibull.setAttribute("name","name4_Weibull")
+    inp4_Weibull.placeholder="Low";
+    inp4_Weibull.style.display = "block";
+    inp4_Weibull.style.margin = "auto";
+    const lineBreakClone4 = lineBreak.cloneNode();
+
+    const submitBtn = document.createElement("button");
+    submitBtn.textContent = "Add";
+    submitBtn.addEventListener("click", sendData);
+    submitBtn.style.display = "block";
+    submitBtn.style.margin = "auto";
+
+
+    const formParent=document.getElementById("value_form")
+    formParent.appendChild(inp1_Weibull)
+    formParent.appendChild(lineBreakClone1)
+    formParent.appendChild(inp2_Weibull)
+    formParent.appendChild(lineBreakClone2)
+    formParent.appendChild(inp3_Weibull)
+    formParent.appendChild(lineBreakClone3)
+    formParent.appendChild(inp4_Weibull)
+    formParent.appendChild(lineBreakClone4)
+    formParent.appendChild(submitBtn)
+
+
+    function sendData() {
+      const csrfToken = document.getElementsByName('csrfmiddlewaretoken')[0].value;
+      const data = {
+          component_Weibull: document.getElementById('input1_Weibull').value,
+          eta_Weibull: document.getElementById('input2_Weibull').value,
+          beta_Weibull: document.getElementById('input3_Weibull').value,
+          reliability_Weibull: document.getElementById('input4_Weibull').value,
+          csrfmiddlewaretoken: csrfToken
+      };
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/save_to_weibull/');
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.setRequestHeader('X-CSRFToken', csrfToken);
+
+      xhr.onload = function() {
+          if (xhr.status === 200) {
+              console.log(xhr.responseText);
+          }
+          else {
+              console.log('Request failed. Returned status of ' + xhr.status);
+          }
+      };
+
+      xhr.send(JSON.stringify(data));
+    }
+
+
+
+    <!--  const element = document.getElementById("div1");-->
+    <!--  const child = document.getElementById("p1");-->
+    <!--  element.insertBefore(para, child);-->
+
+
+    <!--    document.getElementById("value_form").innerHTML += "<input type="text"/>"-->
+  }
+  if (fn_name === "Basic_Shock") {
+    const lineBreak = document.createElement("br");
+    const inp1_BS = document.createElement("input");
+    inp1_BS.setAttribute("id","input1_BS")
+    inp1_BS.setAttribute("name","name1_BS")
+    inp1_BS.placeholder="Component";
+    inp1_BS.style.display = "block";
+    inp1_BS.style.margin = "auto";
+    const lineBreakClone1 = lineBreak.cloneNode();
+
+    <!--  const node = document.createTextNode("This is new.");-->
+    <!--  para.appendChild(node);-->
+
+    const inp2_BS = document.createElement("input");
+    inp2_BS.setAttribute("id","input2_BS")
+    inp2_BS.setAttribute("name","name2_BS")
+    inp2_BS.placeholder="Expected Arrival Time";
+    inp2_BS.style.display = "block";
+    inp2_BS.style.margin = "auto";
+    const lineBreakClone2 = lineBreak.cloneNode();
+
+    const inp3_BS = document.createElement("input");
+    inp3_BS.setAttribute("id","input3_BS")
+    inp3_BS.setAttribute("name","name3_BS")
+    inp3_BS.placeholder="Threshold Shocks";
+    inp3_BS.style.display = "block";
+    inp3_BS.style.margin = "auto";
+    const lineBreakClone3 = lineBreak.cloneNode();
+
+    const submitBtn = document.createElement("button");
+    submitBtn.textContent = "Add";
+    submitBtn.addEventListener("click", sendData);
+    submitBtn.style.display = "block";
+    submitBtn.style.margin = "auto";
+
+
+    const formParent=document.getElementById("value_form")
+    formParent.appendChild(inp1_BS)
+    formParent.appendChild(lineBreakClone1)
+    formParent.appendChild(inp2_BS)
+    formParent.appendChild(lineBreakClone2)
+    formParent.appendChild(inp3_BS)
+    formParent.appendChild(lineBreakClone3)
+    formParent.appendChild(submitBtn)
+
+    function sendData() {
+      const csrfToken = document.getElementsByName('csrfmiddlewaretoken')[0].value;
+      const data = {
+          component_bs: document.getElementById('input1_BS').value,
+          eta_bs: document.getElementById('input2_BS').value,
+          threshold_bs: document.getElementById('input3_BS').value,
+          csrfmiddlewaretoken: csrfToken
+      };
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/save_to_basicshock/');
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.setRequestHeader('X-CSRFToken', csrfToken);
+
+      xhr.onload = function() {
+          if (xhr.status === 200) {
+              console.log(xhr.responseText);
+          }
+          else {
+              console.log('Request failed. Returned status of ' + xhr.status);
+          }
+      };
+
+    xhr.send(JSON.stringify(data));
+    }
+
+    <!--  const element = document.getElementById("div1");-->
+    <!--  const child = document.getElementById("p1");-->
+    <!--  element.insertBefore(para, child);-->
+
+
+    <!--    document.getElementById("value_form").innerHTML += "<input type="text"/>"-->
+  }
+  if (fn_name === "Extreme_Shock") {
+    const lineBreak = document.createElement("br");
+    const inp1_ES = document.createElement("input");
+    inp1_ES.setAttribute("id","input1_ES")
+    inp1_ES.setAttribute("name","name1_ES")
+    inp1_ES.placeholder="Component";
+    inp1_ES.style.display = "block";
+    inp1_ES.style.margin = "auto";
+    const lineBreakClone1 = lineBreak.cloneNode();
+
+
+    const inp2_ES = document.createElement("input");
+    inp2_ES.setAttribute("id","input2_ES")
+    inp2_ES.setAttribute("name","name2_ES")
+    inp2_ES.placeholder="Expected Arrival Time";
+    inp2_ES.style.display = "block";
+    inp2_ES.style.margin = "auto";
+    const lineBreakClone2 = lineBreak.cloneNode();
+
+    const inp3_ES = document.createElement("input");
+    inp3_ES.setAttribute("id","input3_ES")
+    inp3_ES.setAttribute("name","name3_ES")
+    inp3_ES.placeholder="Threshold Shocks";
+    inp3_ES.style.display = "block";
+    inp3_ES.style.margin = "auto";
+    const lineBreakClone3 = lineBreak.cloneNode();
+
+    const inp4_ES = document.createElement("input");
+    inp4_ES.setAttribute("id","input4_ES")
+    inp4_ES.setAttribute("name","name4_ES")
+    inp4_ES.placeholder="Mean magnitude";
+    inp4_ES.style.display = "block";
+    inp4_ES.style.margin = "auto";
+    const lineBreakClone4 = lineBreak.cloneNode();
+
+    const inp5_ES = document.createElement("input");
+    inp5_ES.setAttribute("id","input5_ES")
+    inp5_ES.setAttribute("name","name5_ES")
+    inp5_ES.placeholder="SD of magnitude";
+    inp5_ES.style.display = "block";
+    inp5_ES.style.margin = "auto";
+    const lineBreakClone5 = lineBreak.cloneNode();
+
+    const inp6_ES = document.createElement("input");
+    inp6_ES.setAttribute("id","input6_ES")
+    inp6_ES.setAttribute("name","name6_ES")
+    inp6_ES.placeholder="Threshold magnitude";
+    inp6_ES.style.display = "block";
+    inp6_ES.style.margin = "auto";
+    const lineBreakClone6 = lineBreak.cloneNode();
+
+    const submitBtn = document.createElement("button");
+    submitBtn.textContent = "Add";
+    submitBtn.addEventListener("click", sendData);
+    submitBtn.style.display = "block";
+    submitBtn.style.margin = "auto";
+
+    const formParent=document.getElementById("value_form")
+    formParent.appendChild(inp1_ES)
+    formParent.appendChild(lineBreakClone1)
+    formParent.appendChild(inp2_ES)
+    formParent.appendChild(lineBreakClone2)
+    formParent.appendChild(inp3_ES)
+    formParent.appendChild(lineBreakClone3)
+    formParent.appendChild(inp4_ES)
+    formParent.appendChild(lineBreakClone4)
+    formParent.appendChild(inp5_ES)
+    formParent.appendChild(lineBreakClone5)
+    formParent.appendChild(inp6_ES)
+    formParent.appendChild(lineBreakClone6)
+    formParent.appendChild(submitBtn)
+
+    function sendData() {
+      const csrfToken = document.getElementsByName('csrfmiddlewaretoken')[0].value;
+      const data = {
+          component_es: document.getElementById('input1_ES').value,
+          eta_es: document.getElementById('input2_ES').value,
+          threshold_es: document.getElementById('input3_ES').value,
+          mean_magnitude_es: document.getElementById('input4_ES').value,
+          std_magnitude_es: document.getElementById('input5_ES').value,
+          threshold_magnitude_es: document.getElementById('input6_ES').value,
+          csrfmiddlewaretoken: csrfToken
+      };
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/save_to_extremeshock/');
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.setRequestHeader('X-CSRFToken', csrfToken);
+
+      xhr.onload = function() {
+          if (xhr.status === 200) {
+              console.log(xhr.responseText);
+          }
+          else {
+              console.log('Request failed. Returned status of ' + xhr.status);
+          }
+      };
+    xhr.send(JSON.stringify(data));
+    }
+
+
+    <!--  const element = document.getElementById("div1");-->
+    <!--  const child = document.getElementById("p1");-->
+    <!--  element.insertBefore(para, child);-->
+
+
+    <!--    document.getElementById("value_form").innerHTML += "<input type="text"/>"-->
+  }
+  if (fn_name === "Cumulative_Shock") {
+    const lineBreak = document.createElement("br");
+    const inp1_CS = document.createElement("input");
+    inp1_CS.setAttribute("id","input1_CS")
+    inp1_CS.setAttribute("name","name1_CS")
+    inp1_CS.placeholder="Component";
+    inp1_CS.style.display = "block";
+    inp1_CS.style.margin = "auto";
+    const lineBreakClone1 = lineBreak.cloneNode();
+
+    const inp2_CS = document.createElement("input");
+    inp2_CS.setAttribute("id","input2_CS")
+    inp2_CS.setAttribute("name","name2_CS")
+    inp2_CS.placeholder="Expected Arrival Time";
+    inp2_CS.style.display = "block";
+    inp2_CS.style.margin = "auto";
+    const lineBreakClone2 = lineBreak.cloneNode();
+
+    const inp3_CS = document.createElement("input");
+    inp3_CS.setAttribute("id","input3_CS")
+    inp3_CS.setAttribute("name","name3_CS")
+    inp3_CS.placeholder="Threshold Shocks";
+    inp3_CS.style.display = "block";
+    inp3_CS.style.margin = "auto";
+    const lineBreakClone3 = lineBreak.cloneNode();
+
+    const inp4_CS = document.createElement("input");
+    inp4_CS.setAttribute("id","input4_CS")
+    inp4_CS.setAttribute("name","name4_CS")
+    inp4_CS.placeholder="Mean magnitude";
+    inp4_CS.style.display = "block";
+    inp4_CS.style.margin = "auto";
+    const lineBreakClone4 = lineBreak.cloneNode();
+
+    const inp5_CS = document.createElement("input");
+    inp5_CS.setAttribute("id","input5_CS")
+    inp5_CS.setAttribute("name","name5_CS")
+    inp5_CS.placeholder="SD of magnitude";
+    inp5_CS.style.display = "block";
+    inp5_CS.style.margin = "auto";
+    const lineBreakClone5 = lineBreak.cloneNode();
+
+    const inp6_CS = document.createElement("input");
+    inp6_CS.setAttribute("id","input6_CS")
+    inp6_CS.setAttribute("name","name6_CS")
+    inp6_CS.placeholder="Threshold magnitude";
+    inp6_CS.style.display = "block";
+    inp6_CS.style.margin = "auto";
+    const lineBreakClone6 = lineBreak.cloneNode();
+
+    const submitBtn = document.createElement("button");
+    submitBtn.textContent = "Add";
+    submitBtn.addEventListener("click", sendData);
+    submitBtn.style.display = "block";
+    submitBtn.style.margin = "auto";
+
+    const formParent=document.getElementById("value_form")
+    formParent.appendChild(inp1_CS)
+    formParent.appendChild(lineBreakClone1)
+    formParent.appendChild(inp2_CS)
+    formParent.appendChild(lineBreakClone2)
+    formParent.appendChild(inp3_CS)
+    formParent.appendChild(lineBreakClone3)
+    formParent.appendChild(inp4_CS)
+    formParent.appendChild(lineBreakClone4)
+    formParent.appendChild(inp5_CS)
+    formParent.appendChild(lineBreakClone5)
+    formParent.appendChild(inp6_CS)
+    formParent.appendChild(lineBreakClone6)
+    formParent.appendChild(submitBtn)
+
+    function sendData() {
+      const csrfToken = document.getElementsByName('csrfmiddlewaretoken')[0].value;
+      const data = {
+          component_cs: document.getElementById('input1_CS').value,
+          eta_cs: document.getElementById('input2_CS').value,
+          threshold_cs: document.getElementById('input3_CS').value,
+          mean_magnitude_cs: document.getElementById('input4_CS').value,
+          std_magnitude_cs: document.getElementById('input5_CS').value,
+          threshold_magnitude_cs: document.getElementById('input6_CS').value,
+          csrfmiddlewaretoken: csrfToken
+      };
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/save_to_cumulativeshock/');
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.setRequestHeader('X-CSRFToken', csrfToken);
+
+      xhr.onload = function() {
+          if (xhr.status === 200) {
+              console.log(xhr.responseText);
+          }
+          else {
+              console.log('Request failed. Returned status of ' + xhr.status);
+          }
+      };
+    xhr.send(JSON.stringify(data));
+    }
+
+
+    <!--  const element = document.getElementById("div1");-->
+    <!--  const child = document.getElementById("p1");-->
+    <!--  element.insertBefore(para, child);-->
+
+
+    <!--    document.getElementById("value_form").innerHTML += "<input type="text"/>"-->
+  }
+  if (fn_name === "Degradation1") {
+    const lineBreak = document.createElement("br");
+    const inp1_d1 = document.createElement("input");
+    inp1_d1.setAttribute("id","input1_d1")
+    inp1_d1.setAttribute("name","name1_d1")
+    inp1_d1.placeholder="Component";
+    inp1_d1.style.display = "block";
+    inp1_d1.style.margin = "auto";
+    const lineBreakClone1 = lineBreak.cloneNode();
+
+<!--    const inp2_d1 = document.createElement("input");-->
+<!--    inp2_d1.setAttribute("id","input2_d1")-->
+<!--    inp2_d1.setAttribute("name","name2_d1")-->
+<!--    inp2_d1.placeholder="Parameter z";-->
+    <!--  const node = document.createTextNode("This is new.");-->
+    <!--  para.appendChild(node);-->
+
+    const inp3_d1 = document.createElement("input");
+    inp3_d1.setAttribute("id","input3_d1")
+    inp3_d1.setAttribute("name","name3_d1")
+    inp3_d1.placeholder="Threshold (/100)";
+    inp3_d1.style.display = "block";
+    inp3_d1.style.margin = "auto";
+    const lineBreakClone3 = lineBreak.cloneNode();
+
+    const newOption0 = document.createElement('option');
+    const optionText0 = document.createTextNode('--SELECT PARAMETER DISTRIBUTION--');
+    newOption0.appendChild(optionText0)
+    newOption0.setAttribute('value','--SELECT AN OPTION--');
+    newOption0.setAttribute('disabled',true);
+    newOption0.setAttribute('selected',true);
+
+    const newOption = document.createElement('option');
+    const optionText = document.createTextNode('Uniform Distribution');
+    newOption.appendChild(optionText)
+    newOption.setAttribute('value','Uniform Distribution');
+
+    const newOption1 = document.createElement('option');
+    const optionText1 = document.createTextNode('Normal Distribution');
+    newOption1.appendChild(optionText1)
+    newOption1.setAttribute('value','Normal Distribution');
+
+    const select1 = document.createElement('select');
+    select1.setAttribute("id","Select_d1")
+    select1.setAttribute("name","sel_name_d1")
+    select1.style.display = "block";
+    select1.style.margin = "auto";
+    select1.appendChild(newOption0);
+    select1.appendChild(newOption);
+    select1.appendChild(newOption1);
+    select1.addEventListener('change',handleSelect)
+    const lineBreakCloneS = lineBreak.cloneNode();
+
+    const formParent=document.getElementById("value_form")
+    formParent.appendChild(inp1_d1)
+    formParent.appendChild(lineBreakClone1)
+<!--    formParent.appendChild(inp2_d1)-->
+    formParent.appendChild(inp3_d1)
+    formParent.appendChild(lineBreakClone3)
+    formParent.appendChild(select1)
+    formParent.appendChild(lineBreakCloneS)
+
+    const submitBtn = document.createElement("button");
+    submitBtn.id = "submitBtn";
+    submitBtn.textContent = "Add Component";
+    submitBtn.style.display = "block";
+    submitBtn.style.margin = "auto";
+    submitBtn.addEventListener("click", sendData);
+    formParent.appendChild(submitBtn)
+
+    const inp5_d1 = document.createElement("input");
+    const inp55_d1 = document.createElement("input");
+    const inp6_d1 = document.createElement("input");
+    const inp66_d1 = document.createElement("input");
+
+    function handleSelect(){
+      const submitBtn = document.getElementById('submitBtn');
+      console.log(document.getElementById('Select_d1').value)
+      if (document.getElementById('Select_d1').value=='Uniform Distribution'){
+        if (inp55_d1 && inp66_d1 && formParent.contains(inp55_d1) && formParent.contains(inp66_d1)){
+          console.log("ARRIVED")
+          console.log(submitBtn)
+          formParent.removeChild(inp55_d1)
+          formParent.removeChild(inp66_d1)
+          formParent.removeChild(submitBtn)
+        }
+
+        const lineBreak1 = document.createElement("br");
+        inp5_d1.setAttribute("id","input5_d1")
+        inp5_d1.setAttribute("name","name5_d1")
+        inp5_d1.placeholder="z0_low";
+        inp5_d1.style.display = "block";
+        inp5_d1.style.margin = "auto";
+        const lineBreakClone5 = lineBreak1.cloneNode();
+
+        inp6_d1.setAttribute("id","input6_d1")
+        inp6_d1.setAttribute("name","name6_d1")
+        inp6_d1.placeholder="z0_high";
+        inp6_d1.style.display = "block";
+        inp6_d1.style.margin = "auto";
+        const lineBreakClone6 = lineBreak1.cloneNode();
+
+        const submitBtn1 = document.createElement("button");
+        submitBtn1.id = "submitBtn1";
+        submitBtn1.textContent = "Add Component";
+        submitBtn1.addEventListener("click", sendData);
+        formParent.appendChild(inp5_d1)
+        formParent.appendChild(lineBreakClone5)
+        formParent.appendChild(inp6_d1)
+        formParent.appendChild(lineBreakClone6)
+        formParent.appendChild(submitBtn)
+      }
+
+      else if (document.getElementById('Select_d1').value=='Normal Distribution'){
+        if (inp5_d1 && inp6_d1 && formParent.contains(inp5_d1) && formParent.contains(inp6_d1)){
+          formParent.removeChild(inp5_d1)
+          formParent.removeChild(inp6_d1)
+          formParent.removeChild(submitBtn)
+        }
+
+        const lineBreak1 = document.createElement("br");
+        inp55_d1.setAttribute("id","input55_d1")
+        inp55_d1.setAttribute("name","name55_d1")
+        inp55_d1.placeholder="z0_mean";
+        inp55_d1.style.display = "block";
+        inp55_d1.style.margin = "auto";
+        const lineBreakClone5 = lineBreak1.cloneNode();
+
+        inp66_d1.setAttribute("id","input66_d1")
+        inp66_d1.setAttribute("name","name66_d1")
+        inp66_d1.placeholder="z0_SD";
+        inp66_d1.style.display = "block";
+        inp66_d1.style.margin = "auto";
+        const lineBreakClone6 = lineBreak1.cloneNode();
+
+        const submitBtn = document.createElement("button");
+        submitBtn.id = "submitBtn";
+        submitBtn.textContent = "Add Component";
+        submitBtn.addEventListener("click", sendData);
+        formParent.appendChild(inp55_d1)
+        formParent.appendChild(lineBreakClone5)
+        formParent.appendChild(inp66_d1)
+        formParent.appendChild(lineBreakClone6)
+        formParent.appendChild(submitBtn)
+      }
+    }
+
+
+    function sendData() {
+      const csrfToken = document.getElementsByName('csrfmiddlewaretoken')[0].value;
+      const data = {
+          component_d1: document.getElementById('input1_d1').value,
+<!--          parameter_d1: document.getElementById('input2_d1').value,-->
+          threshold_d1: document.getElementById('input3_d1').value,
+          csrfmiddlewaretoken: csrfToken
+      };
+      if (document.getElementById('input5_d1')) {
+        data.p1_d1 = document.getElementById('input5_d1').value;
+        const dist = 'Uniform';
+        data.dist= dist;
+      } else if (document.getElementById('input55_d1')) {
+        data.p1_d1 = document.getElementById('input55_d1').value;
+        const dist = 'Normal';
+        data.dist= dist;
+      }
+
+      if (document.getElementById('input6_d1')) {
+        data.p2_d1 = document.getElementById('input6_d1').value;
+      } else if (document.getElementById('input66_d1')) {
+        data.p2_d1 = document.getElementById('input66_d1').value;
+      }
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/save_to_degradation1/');
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.setRequestHeader('X-CSRFToken', csrfToken);
+
+      xhr.onload = function() {
+          if (xhr.status === 200) {
+              console.log(xhr.responseText);
+          }
+          else {
+              console.log('Request failed. Returned status of ' + xhr.status);
+          }
+      };
+
+    xhr.send(JSON.stringify(data));
+    }
+
+  }
+  if (fn_name === "Degradation2") {
+    const lineBreak = document.createElement("br");
+    const inp1_d2 = document.createElement("input");
+    inp1_d2.setAttribute("id","input1_d2")
+    inp1_d2.setAttribute("name","name1_d2")
+    inp1_d2.placeholder="Component";
+    inp1_d2.style.display = "block";
+    inp1_d2.style.margin = "auto";
+    const lineBreakClone1 = lineBreak.cloneNode();
+
+<!--    const inp2_d2 = document.createElement("input");-->
+<!--    inp2_d2.setAttribute("id","input2_d2")-->
+<!--    inp2_d2.setAttribute("name","name2_d2")-->
+<!--    inp2_d2.placeholder="Parameter z";-->
+
+
+    const inp3_d2 = document.createElement("input");
+    inp3_d2.setAttribute("id","input3_d2")
+    inp3_d2.setAttribute("name","name3_d2")
+    inp3_d2.placeholder="Threshold";
+    inp3_d2.style.display = "block";
+    inp3_d2.style.margin = "auto";
+    const lineBreakClone3 = lineBreak.cloneNode();
+
+    const newOption0 = document.createElement('option');
+    const optionText0 = document.createTextNode('--SELECT PARAMETER DISTRIBUTION--');
+    newOption0.appendChild(optionText0)
+    newOption0.setAttribute('value','--SELECT AN OPTION--');
+    newOption0.setAttribute('disabled',true);
+    newOption0.setAttribute('selected',true);
+
+    const newOption = document.createElement('option');
+    const optionText = document.createTextNode('Uniform Distribution');
+    newOption.appendChild(optionText)
+    newOption.setAttribute('value','Uniform Distribution');
+
+    const newOption1 = document.createElement('option');
+    const optionText1 = document.createTextNode('Normal Distribution');
+    newOption1.appendChild(optionText1)
+    newOption1.setAttribute('value','Normal Distribution');
+
+    const select1 = document.createElement('select');
+    select1.setAttribute("id","Select_d2")
+    select1.setAttribute("name","sel_name_d2")
+    select1.style.display = "block";
+    select1.style.margin = "auto";
+    select1.appendChild(newOption0);
+    select1.appendChild(newOption);
+    select1.appendChild(newOption1);
+    select1.addEventListener('change',handleSelect)
+    const lineBreakCloneS = lineBreak.cloneNode();
+
+    const formParent=document.getElementById("value_form")
+    formParent.appendChild(inp1_d2)
+    formParent.appendChild(lineBreakClone1)
+<!--    formParent.appendChild(inp2_d2)-->
+    formParent.appendChild(inp3_d2)
+    formParent.appendChild(lineBreakClone3)
+    formParent.appendChild(select1)
+    formParent.appendChild(lineBreakCloneS)
+
+    const inp5_d2 = document.createElement("input");
+    const inp55_d2 = document.createElement("input");
+    const inp6_d2 = document.createElement("input");
+    const inp66_d2 = document.createElement("input");
+
+    const submitBtn = document.createElement("button");
+    submitBtn.textContent = "Add Component";
+    submitBtn.addEventListener("click", sendData);
+    submitBtn.style.display = "block";
+    submitBtn.style.margin = "auto";
+    formParent.appendChild(submitBtn)
+
+    function handleSelect(){
+      console.log(document.getElementById('Select_d2').value)
+      if (document.getElementById('Select_d2').value=='Uniform Distribution'){
+        if (inp55_d2 && inp66_d2 && formParent.contains(inp55_d2) && formParent.contains(inp66_d2)){
+          console.log("ARRIVED")
+          formParent.removeChild(inp55_d2)
+          formParent.removeChild(inp66_d2)
+        }
+
+        const lineBreak1 = document.createElement("br");
+        inp5_d2.setAttribute("id","input5_d2")
+        inp5_d2.setAttribute("name","name5_d2")
+        inp5_d2.placeholder="z0_low";
+        inp5_d2.style.display = "block";
+        inp5_d2.style.margin = "auto";
+        const lineBreakClone5 = lineBreak1.cloneNode();
+
+        inp6_d2.setAttribute("id","input6_d2")
+        inp6_d2.setAttribute("name","name6_d2")
+        inp6_d2.placeholder="z0_high";
+        inp6_d2.style.display = "block";
+        inp6_d2.style.margin = "auto";
+        const lineBreakClone6 = lineBreak1.cloneNode();
+
+        const submitBtn = document.createElement("button");
+        submitBtn.textContent = "Add Component";
+        submitBtn.addEventListener("click", sendData);
+        formParent.appendChild(inp5_d2)
+        formParent.appendChild(lineBreakClone5)
+        formParent.appendChild(inp6_d2)
+        formParent.appendChild(lineBreakClone6)
+        formParent.appendChild(submitBtn)
+      }
+
+      else if (document.getElementById('Select_d2').value=='Normal Distribution'){
+        if (inp5_d2 && inp6_d2 && formParent.contains(inp5_d2) && formParent.contains(inp6_d2)){
+          formParent.removeChild(inp5_d2)
+          formParent.removeChild(inp6_d2)
+
+        }
+
+        const lineBreak1 = document.createElement("br");
+        inp55_d2.setAttribute("id","input55_d2")
+        inp55_d2.setAttribute("name","name55_d2")
+        inp55_d2.placeholder="z0_mean";
+        inp55_d2.style.display = "block";
+        inp55_d2.style.margin = "auto";
+        const lineBreakClone5 = lineBreak1.cloneNode();
+
+        inp66_d2.setAttribute("id","input66_d2")
+        inp66_d2.setAttribute("name","name66_d2")
+        inp66_d2.placeholder="z0_SD";
+        inp66_d2.style.display = "block";
+        inp66_d2.style.margin = "auto";
+        const lineBreakClone6 = lineBreak1.cloneNode();
+
+        const submitBtn = document.createElement("button");
+        submitBtn.textContent = "Add Component";
+        submitBtn.addEventListener("click", sendData);
+        formParent.appendChild(inp55_d2)
+        formParent.appendChild(lineBreakClone5)
+        formParent.appendChild(inp66_d2)
+        formParent.appendChild(lineBreakClone6)
+        formParent.appendChild(submitBtn)
+      }
+    }
+
+
+    function sendData() {
+      const csrfToken = document.getElementsByName('csrfmiddlewaretoken')[0].value;
+      const data = {
+          component_d2: document.getElementById('input1_d2').value,
+<!--          parameter_d2: document.getElementById('input2_d2').value,-->
+          threshold_d2: document.getElementById('input3_d2').value,
+          csrfmiddlewaretoken: csrfToken
+      };
+      if (document.getElementById('input5_d2')) {
+        data.p1_d2 = document.getElementById('input5_d2').value;
+        data.p2_d2 = document.getElementById('input6_d2').value;
+        const dist = 'Uniform';
+        data.dist= dist;
+      } else if (document.getElementById('input55_d2')) {
+        data.p1_d2 = document.getElementById('input55_d2').value;
+        const dist = 'Normal';
+        data.dist= dist;
+        data.p2_d2 = document.getElementById('input66_d2').value;
+      }
+
+
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/save_to_degradation2/');
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.setRequestHeader('X-CSRFToken', csrfToken);
+
+      xhr.onload = function() {
+          if (xhr.status === 200) {
+              console.log(xhr.responseText);
+          }
+          else {
+              console.log('Request failed. Returned status of ' + xhr.status);
+          }
+      };
+
+    xhr.send(JSON.stringify(data));
+    }
+
+  }
+
+
+  if (fn_name === "Degradation3") {
+    const lineBreak = document.createElement("br");
+    const inp1_d3 = document.createElement("input");
+    inp1_d3.setAttribute("id","input1_d3")
+    inp1_d3.setAttribute("name","name1_d3")
+    inp1_d3.placeholder="Component";
+    inp1_d3.style.display = "block";
+    inp1_d3.style.margin = "auto";
+    const lineBreakClone1 = lineBreak.cloneNode();
+
+<!--    const inp2_d4 = document.createElement("input");-->
+<!--    inp2_d4.setAttribute("id","input2_d4")-->
+<!--    inp2_d4.setAttribute("name","name2_d4")-->
+<!--    inp2_d4.placeholder="Parameter z1";-->
+    <!--  const node = document.createTextNode("This is new.");-->
+    <!--  para.appendChild(node);-->
+
+<!--    const inp3_d4 = document.createElement("input");-->
+<!--    inp3_d4.setAttribute("id","input3_d4")-->
+<!--    inp3_d4.setAttribute("name","name3_d4")-->
+<!--    inp3_d4.placeholder="Parameter z2";-->
+
+    const inp4_d3 = document.createElement("input");
+    inp4_d3.setAttribute("id","input4_d3")
+    inp4_d3.setAttribute("name","name4_d3")
+    inp4_d3.placeholder="Threshold (/100)";
+    inp4_d3.style.display = "block";
+    inp4_d3.style.margin = "auto";
+    const lineBreakClone4 = lineBreak.cloneNode();
+
+    const newOption0 = document.createElement('option');
+    const optionText0 = document.createTextNode('--SELECT PARAMETER DISTRIBUTION--');
+    newOption0.appendChild(optionText0)
+    newOption0.setAttribute('value','--SELECT AN OPTION--');
+    newOption0.setAttribute('disabled',true);
+    newOption0.setAttribute('selected',true);
+
+    const newOption = document.createElement('option');
+    const optionText = document.createTextNode('Uniform Distribution');
+    newOption.appendChild(optionText)
+    newOption.setAttribute('value','Uniform Distribution');
+
+    const newOption1 = document.createElement('option');
+    const optionText1 = document.createTextNode('Normal Distribution');
+    newOption1.appendChild(optionText1)
+    newOption1.setAttribute('value','Normal Distribution');
+
+    const select1 = document.createElement('select');
+    select1.setAttribute("id","Select_d3")
+    select1.setAttribute("name","sel_name_d3")
+    select1.style.display = "block";
+    select1.style.margin = "auto";
+    select1.appendChild(newOption0);
+    select1.appendChild(newOption);
+    select1.appendChild(newOption1);
+    select1.addEventListener('change',handleSelect)
+    const lineBreakCloneS = lineBreak.cloneNode();
+
+    const formParent=document.getElementById("value_form")
+    formParent.appendChild(inp1_d3)
+    formParent.appendChild(lineBreakClone1)
+<!--    formParent.appendChild(inp2_d4)-->
+<!--    formParent.appendChild(inp3_d4)-->
+    formParent.appendChild(inp4_d3)
+    formParent.appendChild(lineBreakClone4)
+    formParent.appendChild(select1)
+    formParent.appendChild(lineBreakCloneS)
+
+    const inp5_d3 = document.createElement("input");
+    const inp55_d3 = document.createElement("input");
+    const inp6_d3 = document.createElement("input");
+    const inp66_d3 = document.createElement("input");
+    const inp7_d3 = document.createElement("input");
+    const inp77_d3 = document.createElement("input");
+    const inp8_d3 = document.createElement("input");
+    const inp88_d3 = document.createElement("input");
+    const inp9_d3 = document.createElement("input");
+    const inp99_d3 = document.createElement("input");
+    const inp0_d3 = document.createElement("input");
+    const inp00_d3 = document.createElement("input");
+
+    const submitBtn = document.createElement("button");
+    submitBtn.textContent = "Add Component";
+    submitBtn.addEventListener("click", sendData);
+    formParent.appendChild(submitBtn)
+
+    function handleSelect(){
+      console.log(document.getElementById('Select_d3').value)
+      if (document.getElementById('Select_d3').value=='Uniform Distribution'){
+        if (inp55_d3 && inp66_d3 && inp77_d3 && inp88_d3 && inp99_d3 && inp00_d3 && formParent.contains(inp55_d3) && formParent.contains(inp66_d3) && formParent.contains(inp77_d3) && formParent.contains(inp88_d3) && formParent.contains(inp99_d3) && formParent.contains(inp00_d3)){
+          formParent.removeChild(inp55_d3)
+          formParent.removeChild(inp66_d3)
+          formParent.removeChild(inp77_d3)
+          formParent.removeChild(inp88_d3)
+          formParent.removeChild(inp99_d3)
+          formParent.removeChild(inp00_d3)
+        }
+
+        const lineBreak1 = document.createElement("br");
+        inp5_d3.setAttribute("id","input5_d3")
+        inp5_d3.setAttribute("name","name5_d3")
+        inp5_d3.placeholder="z0_low";
+        inp5_d3.style.display = "block";
+        inp5_d3.style.margin = "auto";
+        const lineBreakClone5 = lineBreak1.cloneNode();
+
+        inp6_d3.setAttribute("id","input6_d3")
+        inp6_d3.setAttribute("name","name6_d3")
+        inp6_d3.placeholder="z0_high";
+        inp6_d3.style.display = "block";
+        inp6_d3.style.margin = "auto";
+        const lineBreakClone6 = lineBreak1.cloneNode();
+
+        inp7_d3.setAttribute("id","input7_d3")
+        inp7_d3.setAttribute("name","name7_d3")
+        inp7_d3.placeholder="z1_low";
+        inp7_d3.style.display = "block";
+        inp7_d3.style.margin = "auto";
+        const lineBreakClone7 = lineBreak1.cloneNode();
+
+        inp8_d3.setAttribute("id","input8_d3")
+        inp8_d3.setAttribute("name","name8_d3")
+        inp8_d3.placeholder="z1_high";
+        inp8_d3.style.display = "block";
+        inp8_d3.style.margin = "auto";
+        const lineBreakClone8 = lineBreak1.cloneNode();
+
+        inp9_d3.setAttribute("id","input9_d3")
+        inp9_d3.setAttribute("name","name9_d3")
+        inp9_d3.placeholder="z2_low";
+        inp9_d3.style.display = "block";
+        inp9_d3.style.margin = "auto";
+        const lineBreakClone9 = lineBreak1.cloneNode();
+
+        inp0_d3.setAttribute("id","input0_d3")
+        inp0_d3.setAttribute("name","name0_d3")
+        inp0_d3.placeholder="z2_high";
+        inp0_d3.style.display = "block";
+        inp0_d3.style.margin = "auto";
+        const lineBreakClone0 = lineBreak1.cloneNode();
+
+        const submitBtn = document.createElement("button");
+        submitBtn.textContent = "Add Component";
+        submitBtn.addEventListener("click", sendData);
+        formParent.appendChild(inp5_d3)
+        formParent.appendChild(lineBreakClone5)
+        formParent.appendChild(inp6_d3)
+        formParent.appendChild(lineBreakClone6)
+        formParent.appendChild(inp7_d3)
+        formParent.appendChild(lineBreakClone7)
+        formParent.appendChild(inp8_d3)
+        formParent.appendChild(lineBreakClone8)
+        formParent.appendChild(inp9_d3)
+        formParent.appendChild(lineBreakClone9)
+        formParent.appendChild(inp0_d3)
+        formParent.appendChild(lineBreakClone0)
+        formParent.appendChild(submitBtn)
+      }
+
+      else if (document.getElementById('Select_d3').value=='Normal Distribution'){
+        if (inp5_d3 && inp6_d3 && inp7_d3 && inp8_d3 && inp9_d3 && inp0_d3 && formParent.contains(inp5_d3) && formParent.contains(inp6_d3) && formParent.contains(inp7_d3) && formParent.contains(inp8_d3) && formParent.contains(inp9_d3) && formParent.contains(inp0_d3)){
+          formParent.removeChild(inp5_d3)
+          formParent.removeChild(inp6_d3)
+          formParent.removeChild(inp7_d3)
+          formParent.removeChild(inp8_d3)
+          formParent.removeChild(inp9_d3)
+          formParent.removeChild(inp0_d3)
+        }
+
+        const lineBreak1 = document.createElement("br");
+        inp55_d3.setAttribute("id","input55_d3")
+        inp55_d3.setAttribute("name","name55_d3")
+        inp55_d3.placeholder="z0_mean";
+        inp55_d3.style.display = "block";
+        inp55_d3.style.margin = "auto";
+        const lineBreakClone5 = lineBreak1.cloneNode();
+
+        inp66_d3.setAttribute("id","input66_d3")
+        inp66_d3.setAttribute("name","name66_d3")
+        inp66_d3.placeholder="z0_SD";
+        inp66_d3.style.display = "block";
+        inp66_d3.style.margin = "auto";
+        const lineBreakClone6 = lineBreak1.cloneNode();
+
+        inp77_d3.setAttribute("id","input77_d3")
+        inp77_d3.setAttribute("name","name77_d3")
+        inp77_d3.placeholder="z1_mean";
+        inp77_d3.style.display = "block";
+        inp77_d3.style.margin = "auto";
+        const lineBreakClone7 = lineBreak1.cloneNode();
+
+        inp88_d3.setAttribute("id","input88_d3")
+        inp88_d3.setAttribute("name","name88_d3")
+        inp88_d3.placeholder="z1_SD";
+        inp88_d3.style.display = "block";
+        inp88_d3.style.margin = "auto";
+        const lineBreakClone8 = lineBreak1.cloneNode();
+
+        inp99_d3.setAttribute("id","input99_d3")
+        inp99_d3.setAttribute("name","name99_d3")
+        inp99_d3.placeholder="z2_mean";
+        inp99_d3.style.display = "block";
+        inp99_d3.style.margin = "auto";
+        const lineBreakClone9 = lineBreak1.cloneNode();
+
+        inp00_d3.setAttribute("id","input00_d3")
+        inp00_d3.setAttribute("name","name00_d3")
+        inp00_d3.placeholder="z2_SD";
+        inp00_d3.style.display = "block";
+        inp00_d3.style.margin = "auto";
+        const lineBreakClone0 = lineBreak1.cloneNode();
+
+        const submitBtn = document.createElement("button");
+        submitBtn.textContent = "Add Component";
+        submitBtn.addEventListener("click", sendData);
+        formParent.appendChild(inp55_d3)
+        formParent.appendChild(lineBreakClone5)
+        formParent.appendChild(inp66_d3)
+        formParent.appendChild(lineBreakClone6)
+        formParent.appendChild(inp77_d3)
+        formParent.appendChild(lineBreakClone7)
+        formParent.appendChild(inp88_d3)
+        formParent.appendChild(lineBreakClone8)
+        formParent.appendChild(inp99_d3)
+        formParent.appendChild(lineBreakClone9)
+        formParent.appendChild(inp00_d3)
+        formParent.appendChild(lineBreakClone0)
+        formParent.appendChild(submitBtn)
+      }
+    }
+
+    function sendData() {
+      const csrfToken = document.getElementsByName('csrfmiddlewaretoken')[0].value;
+      const data = {
+          component_d3: document.getElementById('input1_d3').value,
+<!--          parameter1_d4: document.getElementById('input2_d4').value,-->
+<!--          parameter2_d4: document.getElementById('input3_d4').value,-->
+          threshold_d3: document.getElementById('input4_d3').value,
+          csrfmiddlewaretoken: csrfToken
+      };
+      if (document.getElementById('input5_d3')) {
+        console.log("Started")
+        data.p1_d3 = document.getElementById('input5_d3').value;
+        data.p2_d3 = document.getElementById('input6_d3').value;
+        data.p3_d3 = document.getElementById('input7_d3').value;
+        data.p4_d3 = document.getElementById('input8_d3').value;
+        data.p5_d3 = document.getElementById('input9_d3').value;
+        data.p6_d3 = document.getElementById('input0_d3').value;
+        const dist = 'Uniform';
+        data.dist= dist;
+        console.log(data);
+      } else if (document.getElementById('input55_d3')) {
+        data.p1_d3 = document.getElementById('input55_d3').value;
+        data.p2_d3 = document.getElementById('input66_d3').value;
+        data.p3_d3 = document.getElementById('input77_d3').value;
+        data.p4_d3 = document.getElementById('input88_d3').value;
+        data.p5_d3 = document.getElementById('input99_d3').value;
+        data.p6_d3 = document.getElementById('input00_d3').value;
+        const dist = 'Normal';
+        data.dist= dist;
+        console.log(data);
+       }
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/save_to_degradation3/');
+      console.log("SAVED");
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.setRequestHeader('X-CSRFToken', csrfToken);
+
+      xhr.onload = function() {
+          if (xhr.status === 200) {
+              console.log(xhr.responseText);
+          }
+          else {
+              console.log('Request failed. Returned status of ' + xhr.status);
+          }
+      };
+
+      xhr.send(JSON.stringify(data));
+    }
+  }
+
+
+  if (fn_name === "Degradation4") {
+    const lineBreak = document.createElement("br")
+    const inp1_d4 = document.createElement("input");
+    inp1_d4.setAttribute("id","input1_d4")
+    inp1_d4.setAttribute("name","name1_d4")
+    inp1_d4.placeholder="Component";
+    // Add CSS styles to center the input element
+    inp1_d4.style.display = "block";
+    inp1_d4.style.margin = "auto";
+    const lineBreakClone1 = lineBreak.cloneNode();
+
+<!--    const inp2_d4 = document.createElement("input");-->
+<!--    inp2_d4.setAttribute("id","input2_d4")-->
+<!--    inp2_d4.setAttribute("name","name2_d4")-->
+<!--    inp2_d4.placeholder="Parameter z1";-->
+    <!--  const node = document.createTextNode("This is new.");-->
+    <!--  para.appendChild(node);-->
+
+<!--    const inp3_d4 = document.createElement("input");-->
+<!--    inp3_d4.setAttribute("id","input3_d4")-->
+<!--    inp3_d4.setAttribute("name","name3_d4")-->
+<!--    inp3_d4.placeholder="Parameter z2";-->
+
+    const inp4_d4 = document.createElement("input");
+    inp4_d4.setAttribute("id","input4_d4")
+    inp4_d4.setAttribute("name","name4_d4")
+    inp4_d4.placeholder="Threshold (/10)";
+    inp4_d4.style.display = "block";
+    inp4_d4.style.margin = "auto";
+    const lineBreakClone4 = lineBreak.cloneNode();
+
+    const newOption0 = document.createElement('option');
+    const optionText0 = document.createTextNode('--SELECT PARAMETER DISTRIBUTION--');
+    newOption0.appendChild(optionText0)
+    newOption0.setAttribute('value','--SELECT AN OPTION--');
+    newOption0.setAttribute('disabled',true);
+    newOption0.setAttribute('selected',true);
+
+    const newOption = document.createElement('option');
+    const optionText = document.createTextNode('Uniform Distribution');
+    newOption.appendChild(optionText)
+    newOption.setAttribute('value','Uniform Distribution');
+
+    const newOption1 = document.createElement('option');
+    const optionText1 = document.createTextNode('Normal Distribution');
+    newOption1.appendChild(optionText1)
+    newOption1.setAttribute('value','Normal Distribution');
+
+    const select1 = document.createElement('select');
+    select1.setAttribute("id","Select_d4")
+    select1.setAttribute("name","sel_name_d4")
+    select1.style.display = "block";
+    select1.style.margin = "auto";
+    select1.appendChild(newOption0);
+    select1.appendChild(newOption);
+    select1.appendChild(newOption1);
+    select1.addEventListener('change',handleSelect)
+    const lineBreakCloneS = lineBreak.cloneNode();
+
+
+    const formParent=document.getElementById("value_form")
+    formParent.appendChild(inp1_d4)
+    formParent.appendChild(lineBreakClone1)
+<!--    formParent.appendChild(inp2_d4)-->
+<!--    formParent.appendChild(inp3_d4)-->
+    formParent.appendChild(inp4_d4)
+    formParent.appendChild(lineBreakClone4)
+    formParent.appendChild(select1)
+    formParent.appendChild(lineBreakCloneS)
+
+
+    const inp5_d4 = document.createElement("input");
+    const inp55_d4 = document.createElement("input");
+    const inp6_d4 = document.createElement("input");
+    const inp66_d4 = document.createElement("input");
+    const inp7_d4 = document.createElement("input");
+    const inp77_d4 = document.createElement("input");
+    const inp8_d4 = document.createElement("input");
+    const inp88_d4 = document.createElement("input");
+
+    const submitBtn = document.createElement("button");
+    submitBtn.textContent = "Add Component";
+    submitBtn.addEventListener("click", sendData);
+    formParent.appendChild(submitBtn)
+
+    function handleSelect(){
+      console.log(document.getElementById('Select_d4').value)
+      if (document.getElementById('Select_d4').value=='Uniform Distribution'){
+        if (inp55_d4 && inp66_d4 && inp77_d4 && inp88_d4 && formParent.contains(inp55_d4) && formParent.contains(inp66_d4) && formParent.contains(inp77_d4) && formParent.contains(inp88_d4)){
+          formParent.removeChild(inp55_d4)
+          formParent.removeChild(inp66_d4)
+          formParent.removeChild(inp77_d4)
+          formParent.removeChild(inp88_d4)
+        }
+
+        const lineBreak1 = document.createElement("br");
+        inp5_d4.setAttribute("id","input5_d4")
+        inp5_d4.setAttribute("name","name5_d4")
+        inp5_d4.placeholder="z0_low";
+        inp5_d4.style.display = "block";
+        inp5_d4.style.margin = "auto";
+        const lineBreakClone5 = lineBreak1.cloneNode();
+
+        inp6_d4.setAttribute("id","input6_d4")
+        inp6_d4.setAttribute("name","name6_d4")
+        inp6_d4.placeholder="z0_high";
+        inp6_d4.style.display = "block";
+        inp6_d4.style.margin = "auto";
+        const lineBreakClone6 = lineBreak1.cloneNode();
+
+        inp7_d4.setAttribute("id","input7_d4")
+        inp7_d4.setAttribute("name","name7_d4")
+        inp7_d4.placeholder="z1_low";
+        inp7_d4.style.display = "block";
+        inp7_d4.style.margin = "auto";
+        const lineBreakClone7 = lineBreak1.cloneNode();
+
+        inp8_d4.setAttribute("id","input8_d4")
+        inp8_d4.setAttribute("name","name8_d4")
+        inp8_d4.placeholder="z1_high";
+        inp8_d4.style.display = "block";
+        inp8_d4.style.margin = "auto";
+        const lineBreakClone8 = lineBreak1.cloneNode();
+
+        const submitBtn = document.createElement("button");
+        submitBtn.textContent = "Add Component";
+        submitBtn.addEventListener("click", sendData);
+        formParent.appendChild(inp5_d4)
+        formParent.appendChild(lineBreakClone5)
+        formParent.appendChild(inp6_d4)
+        formParent.appendChild(lineBreakClone6)
+        formParent.appendChild(inp7_d4)
+        formParent.appendChild(lineBreakClone7)
+        formParent.appendChild(inp8_d4)
+        formParent.appendChild(lineBreakClone8)
+        formParent.appendChild(submitBtn)
+      }
+
+      else if (document.getElementById('Select_d4').value=='Normal Distribution'){
+        if (inp5_d4 && inp6_d4 && inp7_d4 && inp8_d4 && formParent.contains(inp5_d4) && formParent.contains(inp6_d4) && formParent.contains(inp7_d4) && formParent.contains(inp8_d4)){
+          formParent.removeChild(inp5_d4)
+          formParent.removeChild(inp6_d4)
+          formParent.removeChild(inp7_d4)
+          formParent.removeChild(inp8_d4)
+        }
+
+        const lineBreak1 = document.createElement("br");
+        inp55_d4.setAttribute("id","input55_d4")
+        inp55_d4.setAttribute("name","name55_d4")
+        inp55_d4.placeholder="z0_mean";
+        inp55_d4.style.display = "block";
+        inp55_d4.style.margin = "auto";
+        const lineBreakClone5 = lineBreak1.cloneNode();
+
+        inp66_d4.setAttribute("id","input66_d4")
+        inp66_d4.setAttribute("name","name66_d4")
+        inp66_d4.placeholder="z0_SD";
+        inp66_d4.style.display = "block";
+        inp66_d4.style.margin = "auto";
+        const lineBreakClone6 = lineBreak1.cloneNode();
+
+        inp77_d4.setAttribute("id","input77_d4")
+        inp77_d4.setAttribute("name","name77_d4")
+        inp77_d4.placeholder="z1_mean";
+        inp77_d4.style.display = "block";
+        inp77_d4.style.margin = "auto";
+        const lineBreakClone7 = lineBreak1.cloneNode();
+
+        inp88_d4.setAttribute("id","input88_d4")
+        inp88_d4.setAttribute("name","name88_d4")
+        inp88_d4.placeholder="z1_SD";
+        inp88_d4.style.display = "block";
+        inp88_d4.style.margin = "auto";
+        const lineBreakClone8 = lineBreak1.cloneNode();
+
+        const submitBtn = document.createElement("button");
+        submitBtn.textContent = "Add Component";
+        submitBtn.addEventListener("click", sendData);
+        formParent.appendChild(inp55_d4)
+        formParent.appendChild(lineBreakClone5)
+        formParent.appendChild(inp66_d4)
+        formParent.appendChild(lineBreakClone6)
+        formParent.appendChild(inp77_d4)
+        formParent.appendChild(lineBreakClone7)
+        formParent.appendChild(inp88_d4)
+        formParent.appendChild(lineBreakClone8)
+        formParent.appendChild(submitBtn)
+      }
+    }
+<!--    const lineBreak = document.createElement("br");-->
+<!--    const submitBtn = document.createElement("button");-->
+<!--    submitBtn.textContent = "Add Component";-->
+<!--    submitBtn.addEventListener("click", sendData);-->
+
+<!--    formParent.appendChild(lineBreak)-->
+<!--    formParent.appendChild(submitBtn)-->
+
+
+
+    function sendData() {
+      const csrfToken = document.getElementsByName('csrfmiddlewaretoken')[0].value;
+      const data = {
+          component_d4: document.getElementById('input1_d4').value,
+<!--          parameter1_d4: document.getElementById('input2_d4').value,-->
+<!--          parameter2_d4: document.getElementById('input3_d4').value,-->
+          threshold_d4: document.getElementById('input4_d4').value,
+          csrfmiddlewaretoken: csrfToken
+      };
+      if (document.getElementById('input5_d4')) {
+        data.p1_d4 = document.getElementById('input5_d4').value;
+        data.p2_d4 = document.getElementById('input6_d4').value;
+        data.p3_d4 = document.getElementById('input7_d4').value;
+        data.p4_d4 = document.getElementById('input8_d4').value;
+        const dist = 'Uniform';
+        data.dist= dist;
+      } else if (document.getElementById('input55_d4')) {
+        data.p1_d4 = document.getElementById('input55_d4').value;
+        data.p2_d4 = document.getElementById('input66_d4').value;
+        data.p3_d4 = document.getElementById('input77_d4').value;
+        data.p4_d4 = document.getElementById('input88_d4').value;
+        const dist = 'Normal';
+        data.dist= dist;
+
+       }
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/save_to_degradation4/');
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.setRequestHeader('X-CSRFToken', csrfToken);
+
+      xhr.onload = function() {
+          if (xhr.status === 200) {
+              console.log(xhr.responseText);
+          }
+          else {
+              console.log('Request failed. Returned status of ' + xhr.status);
+          }
+      };
+
+      xhr.send(JSON.stringify(data));
+    }
+  }
+  if (fn_name === "Degradation5") {
+    const lineBreak = document.createElement("br");
+    const inp1_d5 = document.createElement("input");
+    inp1_d5.setAttribute("id","input1_d5")
+    inp1_d5.setAttribute("name","name1_d5")
+    inp1_d5.placeholder="Component";
+    inp1_d5.style.display = "block";
+    inp1_d5.style.margin = "auto";
+    const lineBreakClone1 = lineBreak.cloneNode();
+
+<!--    const inp2_d4 = document.createElement("input");-->
+<!--    inp2_d4.setAttribute("id","input2_d4")-->
+<!--    inp2_d4.setAttribute("name","name2_d4")-->
+<!--    inp2_d4.placeholder="Parameter z1";-->
+    <!--  const node = document.createTextNode("This is new.");-->
+    <!--  para.appendChild(node);-->
+
+<!--    const inp3_d5 = document.createElement("input");-->
+<!--    inp3_d5.setAttribute("id","input3_d4")-->
+<!--    inp3_d5.setAttribute("name","name3_d4")-->
+<!--    inp3_d5.placeholder="Parameter z2";-->
+
+    const inp4_d5 = document.createElement("input");
+    inp4_d5.setAttribute("id","input4_d5")
+    inp4_d5.setAttribute("name","name4_d5")
+    inp4_d5.placeholder="Threshold (/100)";
+    inp4_d5.style.display = "block";
+    inp4_d5.style.margin = "auto";
+    const lineBreakClone4 = lineBreak.cloneNode();
+
+    const submitBtn = document.createElement("button");
+    submitBtn.textContent = "Add Component";
+    submitBtn.addEventListener("click", sendData);
+    submitBtn.style.display = "block";
+    submitBtn.style.margin = "auto";
+
+    const formParent=document.getElementById("value_form")
+    formParent.appendChild(inp1_d5)
+    formParent.appendChild(lineBreakClone1)
+<!--    formParent.appendChild(inp2_d4)-->
+<!--    formParent.appendChild(inp3_d4)-->
+    formParent.appendChild(inp4_d5)
+    formParent.appendChild(lineBreakClone4)
+    formParent.appendChild(submitBtn)
+
+
+    function sendData() {
+      const csrfToken = document.getElementsByName('csrfmiddlewaretoken')[0].value;
+      const data = {
+          component_d5: document.getElementById('input1_d5').value,
+<!--          parameter1_d5: document.getElementById('input2_d5').value,-->
+<!--          parameter2_d5: document.getElementById('input3_d5').value,-->
+          threshold_d5: document.getElementById('input4_d5').value,
+          csrfmiddlewaretoken: csrfToken
+      };
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/save_to_degradation5/');
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.setRequestHeader('X-CSRFToken', csrfToken);
+
+      xhr.onload = function() {
+          if (xhr.status === 200) {
+              console.log(xhr.responseText);
+          }
+          else {
+              console.log('Request failed. Returned status of ' + xhr.status);
+          }
+      };
+
+      xhr.send(JSON.stringify(data));
+    }
+  }
+}
+
+function get_form() {
+  var e = document.getElementById("select-list");
+  var value = e.value;
+  var text = e.options[e.selectedIndex].text;
+
+  console.log(value, text)
+
+  show_params(value)
+
+}
+
+
+<!--1. knowing which option is selected-->
+<!--2. display form according to selected option : innerHTML-->
+<!--DONE-->
+<!--3. know for which function the values have been submitted-->
+<!--4. call appropriate post request endpoint. : calling a django endpoint from a view-->
+
+
+<!--5. save data in django backend.-->
+
+
+
+
+</script>
+
+</body>
+
+
+
+
+
+</html>
+

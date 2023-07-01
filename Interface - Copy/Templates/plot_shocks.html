@@ -1,0 +1,22 @@
+<!--<!DOCTYPE html>-->
+<!--<html>-->
+<!--<head>-->
+<!--    <title>Plot Page</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--    {% for plot_path in plot_paths %}-->
+<!--    <img src="{{ plot_path }}" alt="Plot" width="500">-->
+<!--  {% endfor %}-->
+<!--</body>-->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Plots</title>
+</head>
+<body>
+    {% for plot in plots %}
+        <img src="data:image/png;base64,{{ plot }}" alt="Plot">
+        <br>
+    {% endfor %}
+</body>
+</html>

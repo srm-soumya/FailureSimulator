@@ -1,0 +1,10 @@
+<form method="post">
+  {% csrf_token %}
+  <label for="selected_function">Select a function:</label>
+  <select id="selected_function" name="selected_function">
+    {% for function in available_functions %}
+      <option value="{{ function }}">{{ function }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit">Submit</button>
+</form>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Template</title>
+</head>
+<body>
+    {% for table_name, table_data in table_data.items %}
+        <h2>{{ table_name }}</h2>
+        <table>
+            <thead>
+                <tr>
+                    {% for heading, value in table_data.items %}
+                        <th>{{ heading }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    {% for heading, value in table_data.items %}
+                        <td>{{ value }}</td>
+                    {% endfor %}
+                </tr>
+            </tbody>
+        </table>
+    {% endfor %}
+</body>
+</html>

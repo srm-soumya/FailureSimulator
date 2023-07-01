@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Export Data to CSV</title>
+</head>
+<body>
+	<h1>Export Data to CSV</h1>
+	<p>Click the button below to export the data to a CSV file.</p>
+
+	<form action="{% url 'export_data_to_csv' %}" method="post">
+		{% csrf_token %}
+		<input type="submit" value="Export to CSV">
+	</form>
+</body>
+</html>
